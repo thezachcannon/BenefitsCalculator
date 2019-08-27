@@ -1,12 +1,12 @@
 import React, { ReactNode, Fragment } from 'react';
 import {Table, TableRow, TableCell, TableHead, TableBody} from '@material-ui/core';
+import { Employee } from '../services/EmployeeService';
 
 interface EmployeeTableProps {
   employees: Array<any>;
 }
-export default class EmployeeTable extends React.Component<EmployeeTableProps> {
-  render(): ReactNode{
-    return <Fragment>
+export default function EmployeeTable (props: EmployeeTableProps) {
+  return (<Fragment>
       <Table >
         <TableHead>
           <TableRow>
@@ -15,14 +15,13 @@ export default class EmployeeTable extends React.Component<EmployeeTableProps> {
           </TableRow>
         </TableHead>
         <TableBody>
-          {this.props.employees.map(row => (
-            <TableRow key={row.name}>
+          {props.employees.map((row: Employee) => (
+            <TableRow key={row.id}>
               <TableCell>{row.firstName}</TableCell>
               <TableCell>{row.lastName}</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </Fragment>
-  }
+    </Fragment>)
 }
