@@ -5,6 +5,7 @@ import EmployeeService from './services/EmployeeService';
 import { IconButton, AppBar, Toolbar, Typography, Container, Grid, Paper, CircularProgress } from '@material-ui/core';
 import { Add } from '@material-ui/icons'
 import EmployeeDialog from './components/EmployeeDialog';
+import {SAVE_EMPLOYEE, ADD_EMPLOYEE} from './constants'
 
 
 const StyledContainer = styled(Container)`
@@ -29,7 +30,7 @@ function App() {
   const [employees, setEmployees] = useState([])
   const [loading, setLoading] = useState(false)
   const [showEmployeeModal, setShowEmployeeModal] = useState(false);
-
+  const [selectedEmployee, setSelectedEmployee] = useState(undefined);
   useEffect(() => {
     async function getEmployees() {
       let employeesResp = await EmployeeService.getEmployees()
@@ -40,6 +41,39 @@ function App() {
     setLoading(false)
   }, [])
 
+  async function handleEmployeeDialogClose(event: any) {
+    switch (event.action) {
+      case ADD_EMPLOYEE:
+        try {
+          let employee = await EmployeeService.saveEmployee(event.payload)
+          setEmployees(employees.concat(employee.data))
+        }
+        catch (e) {
+          console.log(e)
+        }
+        break;
+      case SAVE_EMPLOYEE:
+        console.log(event.payload)
+        try {
+          let employee = await EmployeeService.saveEmployee(event.payload)
+          setEmployees(employees.concat(employee.data))
+        }
+        catch (e) {
+          console.log(e)
+        }
+        break;
+    }
+    setShowEmployeeModal(false)
+    setSelectedEmployee(undefined)
+  }
+
+  function employeeRowClick(id: string) {
+    const employee = employees.filter((employee: any) => employee.id === id)[0]
+    if (employee) {
+      setSelectedEmployee(employee)
+      setShowEmployeeModal(true)
+    }
+  }
   return (
     <div>
       <AppBar position="absolute">
@@ -51,20 +85,19 @@ function App() {
       </AppBar>
       <main>
         <AppBarSpacer />
-        <EmployeeDialog open={showEmployeeModal} handleClose={()=> setShowEmployeeModal(false)}/>
-
+        <EmployeeDialog selectedEmployee={selectedEmployee} open={showEmployeeModal} handleClose={(event: any) => handleEmployeeDialogClose(event)} />
         <StyledContainer maxWidth="lg">
           <Grid container spacing={3}>
             {/* Employee Table */}
             <Grid item xs={12} md={12} lg={12}>
               <Paper>
                 <EmployeeActionContainer>
-                  <IconButton onClick={()=> setShowEmployeeModal(true)} title="Add Employee" color="primary">
+                  <IconButton onClick={() => setShowEmployeeModal(true)} title="Add Employee" color="primary">
                     <Add />
                   </IconButton>
                 </EmployeeActionContainer>
                 <EmployeesTableContainer>
-                  {loading ? <CircularProgress /> : <EmployeeTable employees={employees} />}
+                  {loading ? <CircularProgress /> : <EmployeeTable handleRowClick={employeeRowClick} employees={employees} />}
                 </EmployeesTableContainer>
               </Paper>
             </Grid>
