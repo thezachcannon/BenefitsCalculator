@@ -10,6 +10,12 @@ const EmployeeService = {
   },
   saveEmployee: (employee: any): Promise<AxiosResponse> => {
     return axios.post('https://localhost:5001/api/employees', employee)
+  },
+  saveDependent: (dependent: any): Promise<AxiosResponse> => {
+    return axios.post('https://localhost:5001/api/dependents', dependent)
+  },
+  calculateBenefits: (employeeId: string): Promise<AxiosResponse> => {
+    return axios.get(`https://localhost:5001/api/employees/benefits/${employeeId}`)
   }
 }
 

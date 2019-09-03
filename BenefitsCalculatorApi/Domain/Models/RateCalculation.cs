@@ -33,7 +33,7 @@ namespace BenefitsCalculatorApi.Domain.Models
     }
 
     private double applyDiscount (double amount, double discount){
-      return amount * (1 + discount);
+      return amount * (1 - discount);
     }
 
     internal double calculateNetSalaryAfterCost(double salary, int noOfDependents)

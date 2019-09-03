@@ -5,7 +5,7 @@ import EmployeeService from './services/EmployeeService';
 import { IconButton, AppBar, Toolbar, Typography, Container, Grid, Paper, CircularProgress } from '@material-ui/core';
 import { Add } from '@material-ui/icons'
 import EmployeeDialog from './components/EmployeeDialog';
-import {SAVE_EMPLOYEE, ADD_EMPLOYEE} from './constants'
+import {SAVE_EMPLOYEE, ADD_EMPLOYEE} from './constants';
 
 
 const StyledContainer = styled(Container)`
@@ -53,7 +53,6 @@ function App() {
         }
         break;
       case SAVE_EMPLOYEE:
-        console.log(event.payload)
         try {
           let employee = await EmployeeService.saveEmployee(event.payload)
           setEmployees(employees.concat(employee.data))
@@ -68,12 +67,36 @@ function App() {
   }
 
   function employeeRowClick(id: string) {
-    const employee = employees.filter((employee: any) => employee.id === id)[0]
+    const employee = employees.find((employee: any) => employee.id === id)
     if (employee) {
       setSelectedEmployee(employee)
       setShowEmployeeModal(true)
     }
   }
+
+  async function handleDependentSave(dependentObj: {dependentFirstName: string, dependentLastName: string}){
+    if(selectedEmployee){
+      let dependentResult = await EmployeeService.saveDependent({firstName: dependentObj.dependentFirstName, lastName: dependentObj.dependentLastName, employeeId: selectedEmployee.id})
+      addDependentToEmployeeLocal(selectedEmployee.id, dependentResult.data)
+    }
+  }
+
+  function addDependentToEmployeeLocal(employeeId: string, dependent: {}): void {
+    const employeeIndex = employees.findIndex((employee) => employee.id === employeeId);
+    const employee = Object.assign({}, employees[employeeIndex])
+    if(employee.dependents) {
+      let arrayCopy = [...employee.dependents, dependent]
+      employee.dependents = arrayCopy
+    }
+    else {
+      employee.dependents = [dependent]
+    }
+    const newEmployeeArray = [...employees]
+    newEmployeeArray.splice(employeeIndex, 1, employee)
+    setEmployees(newEmployeeArray)
+    setSelectedEmployee(employee)
+  }
+
   return (
     <div>
       <AppBar position="absolute">
@@ -85,7 +108,7 @@ function App() {
       </AppBar>
       <main>
         <AppBarSpacer />
-        <EmployeeDialog selectedEmployee={selectedEmployee} open={showEmployeeModal} handleClose={(event: any) => handleEmployeeDialogClose(event)} />
+        <EmployeeDialog handleDependentSave={handleDependentSave} selectedEmployee={selectedEmployee} open={showEmployeeModal} handleClose={(event: any) => handleEmployeeDialogClose(event)} />
         <StyledContainer maxWidth="lg">
           <Grid container spacing={3}>
             {/* Employee Table */}
@@ -105,12 +128,6 @@ function App() {
         </StyledContainer>
       </main>
     </div>
-    // <div>
-    //   <TextField value={this.state.firstName} label="First Name" onChange={(event)=> this.updateEmployeeField('firstName', event.target.value)}></TextField>
-    //   <TextField value={this.state.lastName} label="Last Name" onChange={(event)=> this.updateEmployeeField('lastName', event.target.value)}></TextField>
-    //   <Button onClick={()=> this.addEmployee()}>Add Employee</Button>
-    //   <EmployeeTable employees={this.state.employees} />
-    // </div>
   );
 }
 

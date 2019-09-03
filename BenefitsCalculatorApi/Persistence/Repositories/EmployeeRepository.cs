@@ -15,7 +15,7 @@ namespace BenefitsCalculatorApi.Persistence.Repositories
     }
 
     public async Task<IEnumerable<Employee>> GetEmployeesAsync(){
-            return await _context.People.OfType<Employee>().ToListAsync();
+            return await _context.People.OfType<Employee>().Include("Dependents").ToListAsync();
 
     }
     public async Task<Employee> GetAsync(string id)
